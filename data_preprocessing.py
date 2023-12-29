@@ -20,5 +20,15 @@ def data_loader():
     return data
 
 def download_csv_from_s3(bucket_name, s3_file_path, local_file_path):
-    # Create an S3 client
-    #s3_client = boto3.client('s3', aws_access_key_id=os.environ.get('AWS_S3ACCESS_KEY_'))
+    """
+        ...
+    """
+    s3_client = boto3.client('s3', 
+                aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'), 
+                aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'))
+    
+    try:
+        s3_client.download_file(bucket_name, s3_file_path, local_file_path)
+        print(f"File downloaded successfully: {local_file_path}")
+    except Exception as e:
+        print(f"Error downloading file: {e}")
