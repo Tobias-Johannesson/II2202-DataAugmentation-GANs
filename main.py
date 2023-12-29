@@ -1,20 +1,47 @@
+import random
+
 import numpy as np 
 import pandas as pd
+import torch
+import torchvision
+import matplotlib.pyplot as plt
 
 from data_preprocessing import *
+from models import *
+from visuals import *
 from constants import *
 
 def main():
-    #data = sample_data_loader()
-    bucket_name = 'ii2202-data-augmentation-gans'
-    s3_file_path = "./hmnist_28_28_RGB.csv"
-    local_file_path = './datasets/hmnist_28_28_RGB.csv'
-    download_csv_from_s3(bucket_name, s3_file_path, local_file_path)
+    # S3 download example
+    #bucket_name = "ii2202-datasets"
+    #s3_file_path = "hmnist_28_28_RGB.csv"
+    #local_file_path = "./datasets/hmnist_28_28_RGB.csv"
+    #download_csv_from_s3(bucket_name, s3_file_path, local_file_path)
 
-    #data = sample_data_loader(sample_size=500)
-    #data.head()
+    # Kaggle download example
+    #kaggle_file_path = "kmader/skin-cancer-mnist-ham10000"
+    #local_file_path = "./datasets"
+    #download_csv_from_kaggle(kaggle_file_path, local_file_path)  
+
+    # Use the local file
+    file_path = "./datasets/hmnist_28_28_RGB.csv"
+    #data = data_loader(file_path)
+    data = sample_data_loader(file_path, sample_size=1000)
+    #print(data.head())
+    #plot_samples(data)
+
+    X,y = clean_data(data)
+    print(f"Original shape: {X.shape}")
+    X, y = reshape_data(X, y)
+    print(f"New shape: {X.shape}")
+    X_train, X_test, y_train, y_test = data_split(X, y, 0.8)
+
+    # Data augmentation here...
+
+    OUTPUT_DIM = y.unique(return_counts=True)
+    model = get_vgg_model(OUTPUT_DIM)
+
+    print("Model ready for training")    
 
 if __name__ == '__main__':
-    print("Running")
     main()
-    print("Complete")

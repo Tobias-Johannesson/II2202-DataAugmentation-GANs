@@ -1,3 +1,11 @@
+# The data
+datasets/ham10000_images_part_1/*
+datasets/ham10000_images_part_1/*
+datasets/HAM10000_images_part_2/*
+datasets/HAM10000_images_part_2/*
+datasets/hmnist_8_8_L.csv
+datasets/hmnist_28_28_L.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
