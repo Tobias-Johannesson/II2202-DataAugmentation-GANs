@@ -4,7 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from "constants.py" import *
+from constants import *
 
 def sample_data_loader(sample_size: int=500):
     """

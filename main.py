@@ -1,8 +1,8 @@
 import numpy as np 
 import pandas as pd
 
-from "data_preprocessing.py" import * 
-from "constants.py" import *
+from data_preprocessing import *
+from constants import *
 
 def main():
     #data = sample_data_loader()
@@ -11,7 +11,8 @@ def main():
     local_file_path = './datasets/hmnist_28_28_RGB.csv'
     download_csv_from_s3(bucket_name, s3_file_path, local_file_path)
 
-    data.head()
+    #data = sample_data_loader(sample_size=500)
+    #data.head()
 
 if __name__ == '__main__':
     print("Running")
