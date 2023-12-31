@@ -38,8 +38,8 @@ def main():
 
     # Data augmentation here...
 
-    OUTPUT_DIM = y.unique(return_counts=True)
-    model = get_vgg_model(OUTPUT_DIM)
+    number_of_classes = len(y.unique())
+    model = get_vgg_model(number_of_classes)
 
     print("Model ready for training")    
 
