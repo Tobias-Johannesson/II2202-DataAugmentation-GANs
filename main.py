@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 
 from data_preprocessing import *
 from models import *
+from evaluation import *
 from visuals import *
 from constants import *
 
@@ -40,8 +41,13 @@ def main():
 
     number_of_classes = len(y.unique())
     model = get_vgg_model(number_of_classes)
-
     print("Model ready for training")    
+
+    training_loop(model, X_train, y_train)
+    print("Done with training")
+
+    auc_score = get_auc(model, X_test, y_test, number_of_classes)
+    print(f"Model AUC is: {auc_score}")
 
 if __name__ == '__main__':
     main()
