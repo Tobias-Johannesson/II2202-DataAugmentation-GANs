@@ -44,5 +44,5 @@ def plot_samples(data):
     plt.yticks(np.linspace(14,grid.shape[1]-14, 7), labels=[f'[{idx}] {cls_}' for idx, cls_ in enumerate(CLASSES_FULL)])
     plt.title('Sample of skin lesions in HAM10000')
     plt.legend(CLASSES_FULL)
-    plt.savefig('ham10000_samples.png') # Save image as png
+    plt.savefig('results/ham10000_samples.png') # Save image as png
     plt.show(block='off')
