@@ -1,4 +1,6 @@
 # The data
+datasets/images/
+datasets/temp/
 datasets/ham10000_images_part_1/*
 datasets/ham10000_images_part_1/*
 datasets/HAM10000_images_part_2/*

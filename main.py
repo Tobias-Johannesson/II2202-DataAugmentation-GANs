@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 
 from data_preprocessing import *
 from data_augmentation import *
-from conditional_dcgan import *
 from models import *
 from evaluation import *
 from visuals import *
@@ -23,15 +22,16 @@ def main():
     print("Data loaded")
     #plot_samples(data)
 
-    X,y = clean_data(data)
+    X, y = clean_data(data)
     X, y = reshape_data(X, y)
     print(f"Data reshaped")
-    #plot_samples(data)
+    #plot_samples(X)
 
     # Data split and then data augmentation
     X_train, X_test, y_train, y_test = data_split(X, y, 0.8)
     #X_train, y_train = balance_dataset_with_smote(X_train, y_train)
-    X_train, y_train = balance_dataset_with_dcgan(X_train, y_train)
+    X_train, y_train = balance_dataset_with_gan(X_train, y_train)
+    # WGAN
     print(f"Data is augmented/balanced")
 
     number_of_classes = len(y.unique())

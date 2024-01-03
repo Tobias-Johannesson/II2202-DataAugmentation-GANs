@@ -3,6 +3,9 @@ from torch import nn
 import torchvision.models as models
 import torch.optim as optim
 
+from tensorflow import keras
+from tensorflow.keras import layers
+
 def get_vgg_model(out_features: int):
     """
         ...
@@ -16,6 +19,48 @@ def get_vgg_model(out_features: int):
     pretrained_vgg_model.classifier[-1] = final_fc
 
     return pretrained_vgg_model
+
+def get_generator_model(generator_in_channels):
+    image_size = 224
+    num_channels = 3
+
+    generator = keras.Sequential(
+        [   
+            keras.layers.InputLayer((generator_in_channels,)),
+
+            # ...
+            layers.Dense(image_size * image_size * generator_in_channels),
+            layers.LeakyReLU(alpha=0.2),
+            layers.Reshape((image_size, image_size, generator_in_channels)),
+            
+            # ...
+            layers.Conv2DTranspose(128, (4, 4), strides=(1, 1), padding="same"),
+            layers.LeakyReLU(alpha=0.2),
+            # Final Conv2DTranspose layer to get to 224x224 size
+            layers.Conv2DTranspose(3, (4, 4), strides=(1, 1), padding="same"),
+        ],
+        name="generator",
+    )
+
+    return generator
+
+def get_discriminator_model(discriminator_in_channels):
+    image_size = 224
+
+    discriminator = keras.Sequential(
+        [
+            keras.layers.InputLayer((image_size, image_size, discriminator_in_channels)),
+            layers.Conv2D(64, (3, 3), strides=(2, 2), padding="same"),
+            layers.LeakyReLU(alpha=0.2),
+            layers.Conv2D(128, (3, 3), strides=(2, 2), padding="same"),
+            layers.LeakyReLU(alpha=0.2),
+            layers.GlobalMaxPooling2D(),
+            layers.Dense(1),
+        ],
+        name="discriminator",
+    )
+
+    return discriminator
 
 def training_loop(model, X, y):
     criterion = nn.CrossEntropyLoss()
