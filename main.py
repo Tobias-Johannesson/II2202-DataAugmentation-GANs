@@ -26,15 +26,15 @@ def main():
 
     # Use the local file
     file_path = "./datasets/hmnist_28_28_RGB.csv"
-    #data = data_loader(file_path)
-    data = sample_data_loader(file_path, sample_size=1000)
-    #print(data.head())
+    data = data_loader(file_path, sample_size=1000)
+    print(data.head())
     #plot_samples(data)
 
     X,y = clean_data(data)
-    print(f"Original shape: {X.shape}")
     X, y = reshape_data(X, y)
-    print(f"New shape: {X.shape}")
+    print(f"Data reshaped")
+    #plot_samples(data)
+
     X_train, X_test, y_train, y_test = data_split(X, y, 0.8)
 
     # Data augmentation here...

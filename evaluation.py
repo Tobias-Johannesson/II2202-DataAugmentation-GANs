@@ -4,24 +4,30 @@ from sklearn.metrics import roc_auc_score
 
 def get_auc(model, X, y, out_features: int):
     model.eval()
-
     predictions = []
+
+    # Calculate the number of full batches and the remainder
+    full_batches = len(X) // 32
+    remainder = len(X) % 32
+
     with torch.no_grad():
-        for batch in range(len(X)//32): # Need to fix this
+        for batch in range(full_batches):
             print(f"Prediction batch: {batch}")
-            inputs = X[batch*32:batch*32+32]
+            inputs = X[batch * 32: (batch + 1) * 32]
+            outputs = model(inputs)
+            predictions.append(outputs)
+        
+        # Handle the last batch if there is a remainder
+        if remainder:
+            inputs = X[-remainder:]
             outputs = model(inputs)
             predictions.append(outputs)
 
     print("Predictions done")
-    print(len(predictions))
     predictions_tensor = torch.cat(predictions, dim=0)
-    
     softmax = torch.nn.Softmax(dim=1)
     probabilities = softmax(predictions_tensor).numpy()
     y_np = np.array(y)
-
-    # Make sure y_true has at least 2 classes present!!!
 
     # Calculate AUC for each class and average
     auc_scores = []
