@@ -7,6 +7,7 @@ import torchvision
 import matplotlib.pyplot as plt
 
 from data_preprocessing import *
+from data_augmentation import *
 from models import *
 from evaluation import *
 from visuals import *
@@ -26,7 +27,7 @@ def main():
 
     # Use the local file
     file_path = "./datasets/hmnist_28_28_RGB.csv"
-    data = data_loader(file_path, sample_size=1000)
+    data = data_loader(file_path, sample_size=200)
     print(data.head())
     #plot_samples(data)
 
@@ -35,9 +36,10 @@ def main():
     print(f"Data reshaped")
     #plot_samples(data)
 
+    # Data split and then data augmentation
     X_train, X_test, y_train, y_test = data_split(X, y, 0.8)
-
-    # Data augmentation here...
+    X_train, y_train = balance_dataset_with_smote(X_train, y_train)
+    print(f"Data is augmented/balanced")
 
     number_of_classes = len(y.unique())
     model = get_vgg_model(number_of_classes)

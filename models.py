@@ -14,9 +14,11 @@ def get_vgg_model(out_features: int):
     OUTPUT_DIM = out_features
     final_fc = nn.Linear(IN_FEATURES, OUTPUT_DIM)
     pretrained_vgg_model.classifier[-1] = final_fc
-    print("Model is ready")
 
     return pretrained_vgg_model
+
+def get_gan():
+    pass
 
 def training_loop(model, X, y):
     criterion = nn.CrossEntropyLoss()

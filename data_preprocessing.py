@@ -72,7 +72,6 @@ def download_csv_from_kaggle(kaggle_file_path, local_file_path):
     api.dataset_download_files(kaggle_file_path, path=local_file_path, unzip=True)
 
 def clean_data(data: pd.DataFrame):
-    # Turn pandas into PyTorch
     y = data["label"]
     X = data.drop(['label'], axis=1) # Remove labels and index from image_data
 
@@ -83,6 +82,7 @@ def reshape_data(X, y):
         ...
     """
 
+    # Turn into PyTorch Tensors
     number_of_images = len(X)
     shaped_images = torch.Tensor(X.values).reshape(number_of_images, 28, 28, 3).permute(0, 3, 1, 2)
     image_labels = torch.Tensor(y.values).reshape(number_of_images)
