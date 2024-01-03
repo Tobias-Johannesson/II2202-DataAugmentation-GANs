@@ -13,8 +13,12 @@ def balance_dataset_with_smote(X, y):
     """
 
     X_flattened = _flatten_images(X)
-    smote = SMOTE()
+    _, counts = np.unique(y, return_counts=True)
+    k = min(counts.min() - 1, 6)
+
+    smote = SMOTE(k_neighbors=k) # Makes sure it works with small samples
     X_resampled_flat, y_resampled = smote.fit_resample(X_flattened, y)
+
     X_resampled = _reshape_to_image(X_resampled_flat)
     y_resampled = torch.from_numpy(y_resampled)
     return X_resampled, y_resampled

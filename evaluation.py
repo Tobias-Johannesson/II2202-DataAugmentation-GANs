@@ -34,8 +34,15 @@ def get_auc(model, X, y, out_features: int):
     for i in range(out_features):  # For each class
         binary_label = (y_np == i).astype(int)
         class_prob = probabilities[:, i]
-        auc = roc_auc_score(binary_label, class_prob)
-        auc_scores.append(auc)
+
+        # Check if there are at least two classes present
+        if len(np.unique(binary_label)) > 1:
+            auc = roc_auc_score(binary_label, class_prob)
+            auc_scores.append(auc)
+        else:
+            print(f"Skipping AUC for class {i} as it has only one class present in y_true.")
+            # You might choose to append a default value or skip it
+            # auc_scores.append(None)  # For example
 
     average_auc = np.mean(auc_scores)
 

@@ -14,21 +14,12 @@ from visuals import *
 from constants import *
 
 def main():
-    # S3 download example
-    #bucket_name = "ii2202-datasets"
-    #s3_file_path = "hmnist_28_28_RGB.csv"
-    #local_file_path = "./datasets/hmnist_28_28_RGB.csv"
-    #download_csv_from_s3(bucket_name, s3_file_path, local_file_path)
-
-    # Kaggle download example
-    #kaggle_file_path = "kmader/skin-cancer-mnist-ham10000"
-    #local_file_path = "./datasets"
-    #download_csv_from_kaggle(kaggle_file_path, local_file_path)  
+    download_data(option=0) # 0 no download, 1 AWS, 2 Kaggle API
 
     # Use the local file
     file_path = "./datasets/hmnist_28_28_RGB.csv"
-    data = data_loader(file_path, sample_size=200)
-    print(data.head())
+    data = data_loader(file_path, sample_size=400)
+    print("Data loaded")
     #plot_samples(data)
 
     X,y = clean_data(data)

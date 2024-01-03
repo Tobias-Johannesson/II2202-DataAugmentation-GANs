@@ -13,6 +13,20 @@ from torchvision.transforms import ToTensor, transforms
 
 from constants import *
 
+def download_data(option: int=0):
+    """
+
+    """
+
+    if option == 0:
+        return
+    elif option == 1:
+        # S3 download example
+        download_csv_from_s3()
+    elif option == 2:
+        # Kaggle download example
+        download_csv_from_kaggle() 
+
 def sample_data_loader(file_path, sample_size: int=1000):
     """
         Randomly select n samples from the DataFrame
@@ -22,10 +36,14 @@ def sample_data_loader(file_path, sample_size: int=1000):
     return data.sample(n=sample_size, axis=0) #ignore_index=True?
 
 def data_loader(file_path, sample_size: int=-1):
+    """ 
+        
+    """
+
     if sample_size > 0: return sample_data_loader(file_path, sample_size)
     return pd.read_csv(file_path)
 
-def download_csv_from_s3(bucket_name, s3_file_path, local_file_path):
+def download_csv_from_s3(bucket_name: str="ii2202-datasets", s3_file_path: str="hmnist_28_28_RGB.csv", local_file_path: str="./datasets/hmnist_28_28_RGB.csv"):
     """
         ...
     """
@@ -42,7 +60,7 @@ def download_csv_from_s3(bucket_name, s3_file_path, local_file_path):
     except Exception as e:
         print(f"Error downloading file: {e}")
 
-def download_csv_from_kaggle(kaggle_file_path, local_file_path):
+def download_csv_from_kaggle(kaggle_file_path: str="kmader/skin-cancer-mnist-ham10000", local_file_path: str="./datasets"):
     """
         ...
     """
