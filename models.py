@@ -17,9 +17,6 @@ def get_vgg_model(out_features: int):
 
     return pretrained_vgg_model
 
-def get_gan():
-    pass
-
 def training_loop(model, X, y):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=0.01)
@@ -27,6 +24,12 @@ def training_loop(model, X, y):
     # Define the number of epochs and the interval to save performance
     num_epochs = 2 # 10
     print_interval = 2
+
+    # Create DataLoader
+    #X_tensor = torch.tensor(X, dtype=torch.float32)
+    #y_tensor = torch.tensor(y, dtype=torch.long)
+    #dataset = TensorDataset(X_tensor, y_tensor)
+    #data_loader = DataLoader(dataset, batch_size=32, shuffle=True)
 
     # Training loop
     for epoch in range(1, num_epochs + 1):
