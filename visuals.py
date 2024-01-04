@@ -46,3 +46,37 @@ def plot_samples(data):
     plt.legend(CLASSES_FULL)
     plt.savefig('results/ham10000_samples.png') # Save image as png
     plt.show(block='off')
+
+def plot_metrics(metrics_path):
+    # Read metrics from the file
+    with open(metrics_path, 'r') as file:
+        metrics = json.load(file)
+
+    # Plotting
+    for sample_size, data in metrics.items():
+        plt.figure(figsize=(12, 5))
+
+        # Plot accuracy
+        plt.subplot(1, 2, 1)
+        plt.plot(data['average_auc'], label=f'Sample Size: {sample_size}')
+        plt.title('AUC-Score')
+        #plt.xlabel('Iteration')
+        #plt.ylabel('Accuracy')
+        #plt.legend()
+
+        # Plot loss
+        plt.subplot(1, 2, 2)
+        plt.plot(data['average_accuracy'], label=f'Sample Size: {sample_size}')
+        plt.title('Accuracy')
+
+        # Plot accuracy
+        plt.subplot(1, 2, 3)
+        plt.plot(data['average_f1'], label=f'Sample Size: {sample_size}')
+        plt.title('F1-Score')
+
+        # Plot loss
+        plt.subplot(1, 2, 4)
+        plt.plot(data['average_recall'], label=f'Sample Size: {sample_size}')
+        plt.title('Recall')
+
+        plt.show()

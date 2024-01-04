@@ -1,8 +1,8 @@
 import torch
 import numpy as np
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, accuracy_score, f1_score, recall_score
 
-def get_auc(model, X, y, out_features: int):
+def get_metrics(model, X, y, out_features: int):
     model.eval()
     predictions = []
 
@@ -29,11 +29,15 @@ def get_auc(model, X, y, out_features: int):
     probabilities = softmax(predictions_tensor).numpy()
     y_np = np.array(y)
 
-    # Calculate AUC for each class and average
+    # Calculate metrics for each class and average
     auc_scores = []
+    accuracy_scores = []
+    f1_scores = []
+    recall_scores = []
     for i in range(out_features):  # For each class
         binary_label = (y_np == i).astype(int)
         class_prob = probabilities[:, i]
+        pred_label = np.argmax(probabilities, axis=1)
 
         # Check if there are at least two classes present
         if len(np.unique(binary_label)) > 1:
@@ -44,6 +48,23 @@ def get_auc(model, X, y, out_features: int):
             # You might choose to append a default value or skip it
             # auc_scores.append(None)  # For example
 
-    average_auc = np.mean(auc_scores)
+        # Calculate other metrics
+        accuracy = accuracy_score(binary_label, pred_label == i)
+        f1 = f1_score(binary_label, pred_label == i, zero_division=0)
+        recall = recall_score(binary_label, pred_label == i, zero_division=0)
 
-    return average_auc
+        accuracy_scores.append(accuracy)
+        f1_scores.append(f1)
+        recall_scores.append(recall)
+
+    average_auc = np.mean(auc_scores)
+    average_accuracy = np.mean(accuracy_scores)
+    average_f1 = np.mean(f1_scores)
+    average_recall = np.mean(recall_scores)
+
+    return {
+        "average_auc": average_auc,
+        "average_accuracy": average_accuracy,
+        "average_f1": average_f1,
+        "average_recall": average_recall
+    }
