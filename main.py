@@ -5,6 +5,7 @@ import pandas as pd
 import torch
 import torchvision
 import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, classification_report, confusion_matrix
 
 from data_preprocessing import *
 from data_augmentation import *
@@ -18,7 +19,7 @@ def main():
 
     # Use the local file
     file_path = "./datasets/hmnist_28_28_RGB.csv"
-    data = data_loader(file_path, sample_size=400)
+    data = data_loader(file_path, sample_size=10000)
     print("Data loaded")
     #plot_samples(data)
 
@@ -37,10 +38,8 @@ def main():
     number_of_classes = len(y.unique())
     model = get_vgg_model(number_of_classes)
     print("Model ready for training")    
-
     training_loop(model, X_train, y_train)
     print("Done with training")
-
     auc_score = get_auc(model, X_test, y_test, number_of_classes)
     print(f"Model AUC is: {auc_score}")
 

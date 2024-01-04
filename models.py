@@ -28,16 +28,24 @@ def get_generator_model(generator_in_channels):
         [   
             keras.layers.InputLayer((generator_in_channels,)),
 
-            # ...
-            layers.Dense(image_size * image_size * generator_in_channels),
+            # Start with a Dense layer to create a small feature map
+            layers.Dense(7 * 7 * 512),  # Increased depth
             layers.LeakyReLU(alpha=0.2),
-            layers.Reshape((image_size, image_size, generator_in_channels)),
+            layers.Reshape((7, 7, 512)),  # Reshape to a small spatial dimension
             
-            # ...
-            layers.Conv2DTranspose(128, (4, 4), strides=(1, 1), padding="same"),
-            layers.LeakyReLU(alpha=0.2),
-            # Final Conv2DTranspose layer to get to 224x224 size
-            layers.Conv2DTranspose(3, (4, 4), strides=(1, 1), padding="same"),
+            # Gradually upscale the image using Conv2DTranspose layers
+            layers.Conv2DTranspose(512, (4, 4), strides=(2, 2), padding="same"),
+            layers.ReLU(),
+            layers.Conv2DTranspose(256, (4, 4), strides=(2, 2), padding="same"),
+            layers.ReLU(),
+            layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding="same"),
+            layers.ReLU(),
+            layers.Conv2DTranspose(64, (4, 4), strides=(2, 2), padding="same"),
+            layers.ReLU(),
+
+            # Final Conv2DTranspose layer to reach the desired image size
+            #layers.Conv2DTranspose(num_channels, (4, 4), strides=(2, 2), padding="same", activation="sigmoid"),
+            layers.Conv2DTranspose(num_channels, (4, 4), strides=(2, 2), padding="same", activation="tanh"),
         ],
         name="generator",
     )
@@ -50,10 +58,13 @@ def get_discriminator_model(discriminator_in_channels):
     discriminator = keras.Sequential(
         [
             keras.layers.InputLayer((image_size, image_size, discriminator_in_channels)),
+
+            # ...
             layers.Conv2D(64, (3, 3), strides=(2, 2), padding="same"),
             layers.LeakyReLU(alpha=0.2),
             layers.Conv2D(128, (3, 3), strides=(2, 2), padding="same"),
             layers.LeakyReLU(alpha=0.2),
+            #layers.Flatten(),
             layers.GlobalMaxPooling2D(),
             layers.Dense(1),
         ],

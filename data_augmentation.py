@@ -1,19 +1,14 @@
 from imblearn.over_sampling import SMOTE
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 #from torchvision.utils import save_image
-
 import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers
-import os
-
-from pygan._torch.gan_image_generator import GANImageGenerator
 
 from models import *
 
@@ -86,8 +81,6 @@ class ConditionalGAN(keras.Model):
         # Unpack the data.
         real_images, one_hot_labels = data
         image_size = 224
-        #print(one_hot_labels)
-        #print(one_hot_labels.shape)
         num_classes = one_hot_labels.shape[1]
 
         # Add dummy dimensions to the labels so that they can be concatenated with
@@ -102,7 +95,7 @@ class ConditionalGAN(keras.Model):
 
         # Sample random points in the latent space and concatenate the labels.
         # This is for the generator.
-        batch_size = tf.shape(real_images)[0]
+        batch_size = 32 #tf.shape(real_images)[0]
         random_latent_vectors = tf.random.normal(shape=(batch_size, self.latent_dim))
         random_vector_labels = tf.concat(
             [random_latent_vectors, one_hot_labels], axis=1
@@ -164,14 +157,15 @@ def balance_dataset_with_gan(X, y):
     batch_size = 32
     num_channels = 3
     num_classes = len(y.unique())
+    unique, counts = np.unique(y, return_counts=True)
+    class_counts = dict(zip(unique, counts))
+    desired_count = max(class_counts.values())
     image_size = 224
     latent_dim = 128 # Number of nodes used for the generator
-    epochs = 4 
-
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+    epochs = 2
 
     # Scale the pixel values to [0, 1] range
-    X = X.numpy().astype("float32") / 255.0
+    X = X.numpy().astype("float32") #/ 255.0
     X = X.transpose(0, 2, 3, 1) # Move channel to last position
     y = keras.utils.to_categorical(y, num_classes)
 
@@ -191,56 +185,64 @@ def balance_dataset_with_gan(X, y):
         discriminator=discriminator, generator=generator, latent_dim=latent_dim
     )
     cond_gan.compile(
-        d_optimizer=keras.optimizers.Adam(learning_rate=0.0003),
-        g_optimizer=keras.optimizers.Adam(learning_rate=0.0003),
+        d_optimizer=keras.optimizers.Adam(learning_rate=0.0002),
+        g_optimizer=keras.optimizers.Adam(learning_rate=0.0002),
         loss_fn=keras.losses.BinaryCrossentropy(from_logits=True),
     )
     
     cond_gan.fit(dataset, epochs=epochs)
     print("GAN Finished Training")
 
-    # Generating the fake/syntethic images
-    generated_data = generate_data(cond_gan, latent_dim, num_classes)
+    # Generate and collect data for each class
+    generated_images = []
+    generated_labels = []
+    for class_number, count in class_counts.items():
+        num_images_to_generate = desired_count - count
+        if num_images_to_generate > 0:
+            images, labels = generate_data_for_class(cond_gan, latent_dim, num_classes, class_number, num_images_to_generate)
+            generated_images.append(images)
+            generated_labels.append(labels)
+
+    # Convert the lists of arrays to a single array
+    generated_images = np.concatenate(generated_images, axis=0)
+    generated_labels = np.concatenate(generated_labels, axis=0)
     
-    plt.imshow(generated_data[0])
+    plt.imshow(generated_images[0])
     plt.axis('off')  # Turn off axis numbers
     plt.show()
-    plt.imshow(generated_data[1])
+    plt.imshow(generated_images[10])
+    plt.axis('off')  # Turn off axis numbers
+    plt.show()
+    plt.imshow(generated_images[20])
     plt.axis('off')  # Turn off axis numbers
     plt.show()
 
-    return X, y
+    balanced_images = torch.from_numpy(np.concatenate([X, generated_images], axis=0))
+    balanced_images = torch.Tensor(balanced_images.values).permute(0, 3, 1, 2)
+    balanced_labels = torch.from_numpy(np.concatenate([y, generated_labels], axis=0))
 
-def generate_data(cond_gan, latent_dim, num_classes):
-    first_number = 1
-    second_number = 1
-    num_interpolation = 9
+    return balanced_images, balanced_labels
+
+def generate_data_for_class(cond_gan, latent_dim, num_classes, class_number, num_images):
     trained_gen = cond_gan.generator
 
-    # Sample noise for the interpolation.
-    interpolation_noise = tf.random.normal(shape=(1, latent_dim))
-    interpolation_noise = tf.repeat(interpolation_noise, repeats=num_interpolation)
-    interpolation_noise = tf.reshape(interpolation_noise, (num_interpolation, latent_dim))
+    # Generate noise.
+    noise = tf.random.normal(shape=(num_images, latent_dim))
 
-    # Convert the start and end labels to one-hot encoded vectors.
-    first_label = keras.utils.to_categorical([first_number], num_classes)
-    second_label = keras.utils.to_categorical([second_number], num_classes)
-    first_label = tf.cast(first_label, tf.float32)
-    second_label = tf.cast(second_label, tf.float32)
+    # Convert class number to one-hot encoded vector.
+    class_label = keras.utils.to_categorical([class_number] * num_images, num_classes)
+    class_label = tf.cast(class_label, tf.float32)
 
-    # Calculate the interpolation vector between the two labels.
-    percent_second_label = tf.linspace(0, 1, num_interpolation)[:, None]
-    percent_second_label = tf.cast(percent_second_label, tf.float32)
-    interpolation_labels = (
-        first_label * (1 - percent_second_label) + second_label * percent_second_label
-    )
-
-    # Combine the noise and the labels and run inference with the generator.
-    noise_and_labels = tf.concat([interpolation_noise, interpolation_labels], 1)
-    fake = trained_gen.predict(noise_and_labels)
+    # Combine the noise and the labels.
+    noise_and_labels = tf.concat([noise, class_label], 1)
         
-    fake_images = fake * 255.0 # Scale up to full RGB
+    # Generate images.
+    fake_images = trained_gen.predict(noise_and_labels)
+    fake_images = fake_images #* 255.0  # Scale up to full RGB
     converted_images = fake_images.astype(np.uint8)
     converted_images = tf.image.resize(converted_images, (224, 224)).numpy().astype(np.uint8)
 
-    return converted_images
+    # Generate labels for the created images
+    generated_labels = np.full((num_images, num_classes), class_number)
+
+    return converted_images, generated_labels
